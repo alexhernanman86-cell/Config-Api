@@ -31,10 +31,10 @@ BLOCK:Keycheck
     STRINGKEY @data.SOURCE Contains "Submission Error"
     STRINGKEY @data.SOURCE Contains "Invalid username or password"
     STRINGKEY @data.SOURCE Contains "error"
-    STRINGKEY @data.STATUSCODE Equals "401"
+    STRINGKEY @data.STATUSCODE Contains "401"
   KEYCHAIN SUCCESS OR
     STRINGKEY @data.SOURCE Contains "Dashboard"
     STRINGKEY @data.SOURCE Contains "Welcome"
-    STRINGKEY @data.STATUSCODE Equals "302"
+    STRINGKEY @data.STATUSCODE Contains "302"
     STRINGKEY @data.HEADERS["Location"] Contains "/Dashboard"
 ENDBLOCK
