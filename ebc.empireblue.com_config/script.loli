@@ -1,7 +1,7 @@
 BLOCK:HttpRequest
 LABEL:GetLoginPage
   url = "https://ebc.empireblue.com/"
-  customHeaders = {("accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8"), ("accept-language", "en-US,en;q=0.9"), ("accept-encoding", "gzip, deflate, br"), ("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"), ("upgrade-insecure-requests", "1")}
+  customHeaders = {("accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8"), ("accept-language", "en-US,en;q=0.9"), ("accept-encoding", "gzip, deflate, br"), ("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"), ("upgrade-insecure-requests", "1")}
   TYPE:STANDARD
   $""
   ""
@@ -20,7 +20,7 @@ BLOCK:HttpRequest
 LABEL:Login
   url = "https://ebc.empireblue.com/Authentication/Handshake"
   method = POST
-  customHeaders = {("accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8"), ("accept-language", "en-US,en;q=0.9"), ("accept-encoding", "gzip, deflate, br"), ("content-type", "application/x-www-form-urlencoded"), ("origin", "https://ebc.empireblue.com"), ("referer", "https://ebc.empireblue.com/"), ("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"), ("upgrade-insecure-requests", "1")}
+  customHeaders = {("accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8"), ("accept-language", "en-US,en;q=0.9"), ("accept-encoding", "gzip, deflate, br"), ("content-type", "application/x-www-form-urlencoded"), ("origin", "https://ebc.empireblue.com"), ("referer", "https://ebc.empireblue.com/"), ("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"), ("upgrade-insecure-requests", "1")}
   TYPE:STANDARD
   $"UserName=@input.USER&Password=@input.PASS&__RequestVerificationToken=@CSRFToken"
   "application/x-www-form-urlencoded"
