@@ -3,8 +3,6 @@ LABEL:GetLoginPage
   url = "https://www.anthembluecross.com/account-login/"
   customHeaders = {("accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8"), ("accept-language", "en-US,en;q=0.9"), ("accept-encoding", "gzip, deflate, br"), ("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"), ("upgrade-insecure-requests", "1")}
   TYPE:STANDARD
-  $""
-  ""
 ENDBLOCK
 
 BLOCK:HttpRequest
@@ -12,8 +10,6 @@ LABEL:GetLoginRedirect
   url = "https://www.anthembluecross.com/login/"
   customHeaders = {("accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8"), ("accept-language", "en-US,en;q=0.9"), ("accept-encoding", "gzip, deflate, br"), ("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"), ("referer", "https://www.anthembluecross.com/account-login/"), ("upgrade-insecure-requests", "1")}
   TYPE:STANDARD
-  $""
-  ""
 ENDBLOCK
 
 BLOCK:Parse
@@ -30,8 +26,6 @@ LABEL:GetOAuthPage
   url = "https://login.anthembluecross.com/oauth2/default/v1/authorize?client_id=0oajfbqgguJEhJmkp5d7&response_type=code&scope=openid%20profile%20email&redirect_uri=https://www.anthembluecross.com/authorization-code/callback&state=STATE&nonce=NONCE"
   customHeaders = {("accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8"), ("accept-language", "en-US,en;q=0.9"), ("accept-encoding", "gzip, deflate, br"), ("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"), ("referer", "https://www.anthembluecross.com/login/"), ("upgrade-insecure-requests", "1")}
   TYPE:STANDARD
-  $""
-  ""
 ENDBLOCK
 
 BLOCK:Parse
@@ -78,8 +72,6 @@ LABEL:CompleteOAuthFlow
   url = "https://login.anthembluecross.com/oauth2/default/v1/authorize?client_id=0oajfbqgguJEhJmkp5d7&response_type=code&scope=openid%20profile%20email&redirect_uri=https://www.anthembluecross.com/authorization-code/callback&state=STATE&nonce=NONCE&sessionToken=@SessionToken"
   customHeaders = {("accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8"), ("accept-language", "en-US,en;q=0.9"), ("accept-encoding", "gzip, deflate, br"), ("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"), ("referer", "https://login.anthembluecross.com/"), ("upgrade-insecure-requests", "1")}
   TYPE:STANDARD
-  $""
-  ""
 ENDBLOCK
 
 BLOCK:Keycheck
