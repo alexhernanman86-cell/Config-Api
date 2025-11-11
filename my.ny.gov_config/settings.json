@@ -1,0 +1,46 @@
+{
+  "GeneralSettings": {
+    "SuggestedBots": 1,
+    "MaximumCPM": 0,
+    "SaveEmptyCaptures": false,
+    "ContinueStatuses": [
+      "SUCCESS",
+      "NONE"
+    ]
+  },
+  "ProxySettings": {
+    "UseProxies": false,
+    "MaxUsesPerProxy": 0,
+    "BanLoopEvasion": 100,
+    "BanProxyStatuses": [
+      "BAN",
+      "ERROR"
+    ],
+    "AllowedProxyTypes": [
+      0,
+      1,
+      3,
+      2
+    ]
+  },
+  "InputSettings": {
+    "CustomInputs": []
+  },
+  "DataSettings": {
+    "AllowedWordlistTypes": [
+      "Default"
+    ],
+    "UrlEncodeDataAfterSlicing": false,
+    "DataRules": [],
+    "AllowedWordlistTypesString": "Default"
+  },
+  "PuppeteerSettings": {
+    "QuitBrowserStatuses": [],
+    "Headless": true,
+    "CommandLineArgs": "--disable-notifications",
+    "IgnoreHttpsErrors": false
+  },
+  "ScriptSettings": {
+    "CustomUsings": []
+  }
+}

