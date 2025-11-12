@@ -14,28 +14,13 @@ LABEL:ExtractCSRFToken
   => VAR @CSRFToken
 ENDBLOCK
 
-BLOCK:Parse
-LABEL:ExtractLoginURL
-  input = @data.SOURCE
-  leftDelim = "action=\""
-  rightDelim = "\""
-  MODE:LR
-  => VAR @LoginURL
-ENDBLOCK
-
-BLOCK:Function
-LABEL:BuildLoginURL
-  function = "if(@LoginURL.StartsWith(\"/\")) { return \"https://bluebetz.net\" + @LoginURL; } else if(@LoginURL.StartsWith(\"http\")) { return @LoginURL; } else { return \"https://bluebetz.net/login\"; }"
-  => VAR @FinalLoginURL
-ENDBLOCK
-
 BLOCK:HttpRequest
 LABEL:Login
-  url = @FinalLoginURL
+  url = "https://bluebetz.net/login"
   method = POST
   customHeaders = {("accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8"), ("accept-language", "en-US,en;q=0.9"), ("accept-encoding", "gzip, deflate, br"), ("content-type", "application/x-www-form-urlencoded"), ("origin", "https://bluebetz.net"), ("referer", "https://bluebetz.net/home"), ("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"), ("upgrade-insecure-requests", "1")}
   TYPE:STANDARD
-  "_token=@CSRFToken&email=@input.USER&password=@input.PASS"
+  $"_token=@CSRFToken&email=@input.USER&password=@input.PASS"
   "application/x-www-form-urlencoded"
 ENDBLOCK
 
